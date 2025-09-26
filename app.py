@@ -22,7 +22,7 @@ st.set_page_config(page_title="Event Ticket Portal", layout="wide", page_icon="ð
 st.markdown("<h1 style='text-align:center;color:#004AAD;'>ðŸŽ« Event Ticket Portal</h1>", unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
 
-# --- Netflix-style Event Selection with sleek buttons ---
+# --- Netflix-style Event Selection with sleek centered buttons ---
 st.markdown("<h2 style='color:#004AAD;'>Select Your Event</h2>", unsafe_allow_html=True)
 
 cards_per_row = 4
@@ -40,36 +40,34 @@ for i, (ename, data) in enumerate(events.items()):
     img = Image.open(img_path)
     col.image(img, width=250, use_column_width=False)
 
-    # Sleek Netflix-style button
-    button_html = f"""
-    <div style="
-        background-color:#E50914;
-        color:white;
-        font-weight:bold;
-        padding:8px 12px;
-        border-radius:5px;
-        text-align:center;
-        cursor:pointer;
-        font-family: Arial, sans-serif;
-        box-shadow: 2px 2px 6px #aaa;
-        transition: transform 0.2s;
-        margin-top:-10px;
-    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        {ename}
+    # Centered button + stats
+    card_html = f"""
+    <div style='text-align:center; margin-top:-10px;'>
+        <div style="
+            background-color:#E50914;
+            color:white;
+            font-weight:bold;
+            padding:8px 12px;
+            border-radius:5px;
+            display:inline-block;
+            cursor:pointer;
+            font-family: Arial, sans-serif;
+            box-shadow: 2px 2px 6px #aaa;
+            transition: transform 0.2s;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            {ename}
+        </div>
+
+        <p style='font-size:12px;margin:2px 0;'>Tickets Scanned: <b>{data['tickets_scanned']}</b></p>
+        <p style='font-size:12px;margin:2px 0;'>Remaining Capacity: <b>{data['capacity']}</b></p>
     </div>
     """
 
-    col.markdown(button_html, unsafe_allow_html=True)
+    col.markdown(card_html, unsafe_allow_html=True)
 
-    # Button below image to select event (functional in Streamlit)
+    # Functional Streamlit button below
     if col.button(f"Select {ename}", key=f"btn_{i}"):
         selected_event = ename
-
-    # Display compact stats below button
-    col.markdown(f"""
-    <p style='font-size:12px;margin:2px 0;'>Tickets Scanned: <b>{data['tickets_scanned']}</b></p>
-    <p style='font-size:12px;margin:2px 0;'>Remaining Capacity: <b>{data['capacity']}</b></p>
-    """, unsafe_allow_html=True)
 
 # --- Buy or Scan Option ---
 if selected_event:
@@ -107,7 +105,7 @@ if selected_event:
     # --- Scan Ticket Flow ---
     elif choice == "Scan Ticket":
         st.markdown("### Scan QR Code to Verify Ticket")
-        qr_data = f"http://localhost:8501/verify_ticket?event={selected_event}"  # Replace with deployed URL for Cloud
+        qr_data = f"http://localhost:8501/verify_ticket?event={selected_event}"  # Replace with deployed URL
         qr = qrcode.QRCode(box_size=10, border=4)
         qr.add_data(qr_data)
         qr.make(fit=True)
@@ -116,4 +114,3 @@ if selected_event:
         qr_img.save(buf)
         st.image(buf)
         st.info("Scan this QR Code to go to the ticket verification page")
-
