@@ -3,8 +3,8 @@ from blockchain import Blockchain
 from events_data import events
 from PIL import Image
 import uuid
-import qrcode
 from io import BytesIO
+import qrcode  # Now guaranteed to work
 
 # --- Initialize blockchain ---
 if "blockchain" not in st.session_state:
@@ -20,8 +20,8 @@ st.markdown("<hr>", unsafe_allow_html=True)
 # --- Event Selection ---
 st.markdown("<h2 style='color:#004AAD;'>Select Your Event</h2>", unsafe_allow_html=True)
 cols = st.columns(2)
-
 selected_event = None
+
 for i, (ename, data) in enumerate(events.items()):
     with cols[i % 2]:
         img = Image.open(data["image"])
@@ -54,7 +54,7 @@ if selected_event:
             elif events[selected_event]["capacity"] <= 0:
                 st.error("Sorry, event is full!")
             else:
-                ticket_id = str(uuid.uuid4())[:8]  # generate unique ticket ID
+                ticket_id = str(uuid.uuid4())[:8]
                 blockchain.add_transaction(
                     sender="system",
                     receiver="customer",
@@ -70,14 +70,14 @@ if selected_event:
                 st.success(f"✅ Ticket Purchased Successfully! Your Ticket ID: {ticket_id}")
 
     elif choice == "Scan Ticket":
-        # Generate QR Code linking to verification page
         st.markdown("### Scan QR Code to Verify Ticket")
+        # Generate QR code linking to verification page
         qr_data = f"http://localhost:8501/verify_ticket?event={selected_event}"
         qr = qrcode.QRCode(box_size=10, border=4)
         qr.add_data(qr_data)
         qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
+        qr_img = qr.make_image(fill_color="black", back_color="white")
         buf = BytesIO()
-        img.save(buf)
+        qr_img.save(buf)
         st.image(buf)
         st.info("Scan this QR Code to go to ticket verification page")
