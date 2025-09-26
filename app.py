@@ -51,7 +51,10 @@ st.markdown("<h2 style='color:#004AAD;'>Select Your Event</h2>", unsafe_allow_ht
 
 cards_per_row = 4
 cols = st.columns(cards_per_row)
-selected_event = None
+
+# Use session_state to persist selected event
+if "selected_event" not in st.session_state:
+    st.session_state.selected_event = None
 
 for i, (ename, data) in enumerate(events.items()):
     col = cols[i % cards_per_row]
@@ -75,9 +78,9 @@ for i, (ename, data) in enumerate(events.items()):
     </div>
     """, unsafe_allow_html=True)
 
-    # Merged Netflix-style button (fully functional)
+    # Functional merged Netflix-style button
     if col.button(ename, key=f"btn_{i}"):
-        selected_event = ename
+        st.session_state.selected_event = ename
 
     # Stats below button
     col.markdown(f"""
@@ -87,19 +90,21 @@ for i, (ename, data) in enumerate(events.items()):
     </div>
     """, unsafe_allow_html=True)
 
+selected_event = st.session_state.selected_event
+
 # --- Buy or Scan Option ---
 if selected_event:
     st.markdown(f"<h2 style='color:#004AAD;'>Selected Event: {selected_event}</h2>", unsafe_allow_html=True)
-    choice = st.radio("Choose Action", ["Buy Ticket", "Scan Ticket"])
+    choice = st.radio("Choose Action", ["Buy Ticket", "Scan Ticket"], key="action_choice")
 
     # --- Buy Ticket Flow ---
     if choice == "Buy Ticket":
         st.markdown("### Enter Your Details")
-        name = st.text_input("Name")
-        phone = st.text_input("Phone Number")
-        uid = st.text_input("Unique ID (UID)")
+        name = st.text_input("Name", key="name_input")
+        phone = st.text_input("Phone Number", key="phone_input")
+        uid = st.text_input("Unique ID (UID)", key="uid_input")
 
-        if st.button("Confirm Purchase"):
+        if st.button("Confirm Purchase", key="confirm_purchase"):
             if not name or not phone or not uid:
                 st.warning("Please fill all fields")
             elif events[selected_event]["capacity"] <= 0:
@@ -132,4 +137,3 @@ if selected_event:
         qr_img.save(buf)
         st.image(buf)
         st.info("Scan this QR Code to go to the ticket verification page")
-
