@@ -6,6 +6,7 @@ from PIL import Image
 import uuid
 from io import BytesIO
 import qrcode
+import base64
 
 # --- Initialize blockchain ---
 if "blockchain" not in st.session_state:
@@ -22,7 +23,7 @@ st.set_page_config(page_title="Event Ticket Portal", layout="wide", page_icon="ð
 st.markdown("<h1 style='text-align:center;color:#004AAD;'>ðŸŽ« Event Ticket Portal</h1>", unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
 
-# --- Inject hover CSS for Netflix-style buttons ---
+# --- Inject CSS for Netflix-style buttons ---
 st.markdown("""
 <style>
 .card-button {
@@ -38,6 +39,7 @@ st.markdown("""
     transition: transform 0.2s;
     text-align:center;
     text-decoration: none;
+    margin-top:5px;
 }
 .card-button:hover {
     transform: scale(1.05);
@@ -61,19 +63,26 @@ for i, (ename, data) in enumerate(events.items()):
         continue
 
     img = Image.open(img_path)
-    col.image(img, width=250, use_column_width=False)
+    # Convert image to base64 to embed in HTML for perfect center alignment
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
 
-    # Functional Streamlit button styled via CSS
-    if col.button(ename, key=f"btn_{i}"):
-        selected_event = ename
-
-    # Compact stats centered below button
-    col.markdown(f"""
-    <div style='text-align:center; margin-top:4px;'>
+    # Full card: image + button + stats centered
+    card_html = f"""
+    <div style="text-align:center; margin-bottom:15px;">
+        <img src="data:image/png;base64,{img_str}" 
+            style="width:250px; display:block; margin:0 auto; border-radius:5px;"/>
+        <div class="card-button">{ename}</div>
         <p style='font-size:12px;margin:2px 0;'>Tickets Scanned: <b>{data['tickets_scanned']}</b></p>
         <p style='font-size:12px;margin:2px 0;'>Remaining Capacity: <b>{data['capacity']}</b></p>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    col.markdown(card_html, unsafe_allow_html=True)
+
+    # Functional Streamlit button (invisible) to handle selection
+    if col.button(f"Select {ename}", key=f"btn_{i}", help="Click the red button above"):
+        selected_event = ename
 
 # --- Buy or Scan Option ---
 if selected_event:
