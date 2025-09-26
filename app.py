@@ -22,7 +22,30 @@ st.set_page_config(page_title="Event Ticket Portal", layout="wide", page_icon="ð
 st.markdown("<h1 style='text-align:center;color:#004AAD;'>ðŸŽ« Event Ticket Portal</h1>", unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
 
-# --- Netflix-style Event Selection with sleek centered buttons ---
+# --- Inject hover CSS for Netflix-style buttons ---
+st.markdown("""
+<style>
+.card-button {
+    background-color: #E50914;
+    color: white;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 5px;
+    display: inline-block;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    box-shadow: 2px 2px 6px #aaa;
+    transition: transform 0.2s;
+    text-align:center;
+    text-decoration: none;
+}
+.card-button:hover {
+    transform: scale(1.05);
+}
+</style>
+""", unsafe_allow_html=True)
+
+# --- Netflix-style Event Selection ---
 st.markdown("<h2 style='color:#004AAD;'>Select Your Event</h2>", unsafe_allow_html=True)
 
 cards_per_row = 4
@@ -40,34 +63,17 @@ for i, (ename, data) in enumerate(events.items()):
     img = Image.open(img_path)
     col.image(img, width=250, use_column_width=False)
 
-    # Centered button + stats
-    card_html = f"""
-    <div style='text-align:center; margin-top:-10px;'>
-        <div style="
-            background-color:#E50914;
-            color:white;
-            font-weight:bold;
-            padding:8px 12px;
-            border-radius:5px;
-            display:inline-block;
-            cursor:pointer;
-            font-family: Arial, sans-serif;
-            box-shadow: 2px 2px 6px #aaa;
-            transition: transform 0.2s;
-        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-            {ename}
-        </div>
+    # Functional Streamlit button styled via CSS
+    if col.button(ename, key=f"btn_{i}"):
+        selected_event = ename
 
+    # Compact stats centered below button
+    col.markdown(f"""
+    <div style='text-align:center; margin-top:4px;'>
         <p style='font-size:12px;margin:2px 0;'>Tickets Scanned: <b>{data['tickets_scanned']}</b></p>
         <p style='font-size:12px;margin:2px 0;'>Remaining Capacity: <b>{data['capacity']}</b></p>
     </div>
-    """
-
-    col.markdown(card_html, unsafe_allow_html=True)
-
-    # Functional Streamlit button below
-    if col.button(f"Select {ename}", key=f"btn_{i}"):
-        selected_event = ename
+    """, unsafe_allow_html=True)
 
 # --- Buy or Scan Option ---
 if selected_event:
