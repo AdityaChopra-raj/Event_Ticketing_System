@@ -128,7 +128,12 @@ if selected_event:
     # --- Scan Ticket Flow ---
     elif choice == "Scan Ticket":
         st.markdown("### Scan QR Code to Verify Ticket")
-        qr_data = f"http://localhost:8501/verify_ticket?event={selected_event}"  # Replace with deployed URL
+        
+        # --- Generate QR code with Streamlit Cloud URL ---
+        # Replace this with your deployed app URL
+        base_url = st.secrets.get("BASE_URL", "https://your-app-name.streamlit.app")
+        qr_data = f"{base_url}/verify_ticket?event={selected_event}"
+
         qr = qrcode.QRCode(box_size=10, border=4)
         qr.add_data(qr_data)
         qr.make(fit=True)
