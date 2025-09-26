@@ -23,25 +23,24 @@ st.set_page_config(page_title="Event Ticket Portal", layout="wide", page_icon="ð
 st.markdown("<h1 style='text-align:center;color:#004AAD;'>ðŸŽ« Event Ticket Portal</h1>", unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
 
-# --- Inject CSS for Netflix-style buttons ---
+# --- CSS for Netflix-style buttons ---
 st.markdown("""
 <style>
-.card-button {
+div.stButton > button {
     background-color: #E50914;
     color: white;
     font-weight: bold;
     padding: 8px 12px;
     border-radius: 5px;
-    display: inline-block;
+    width: 250px;
+    margin: 5px auto 0 auto;
+    display: block;
     cursor: pointer;
     font-family: Arial, sans-serif;
     box-shadow: 2px 2px 6px #aaa;
     transition: transform 0.2s;
-    text-align:center;
-    text-decoration: none;
-    margin-top:5px;
 }
-.card-button:hover {
+div.stButton > button:hover {
     transform: scale(1.05);
 }
 </style>
@@ -63,26 +62,30 @@ for i, (ename, data) in enumerate(events.items()):
         continue
 
     img = Image.open(img_path)
-    # Convert image to base64 to embed in HTML for perfect center alignment
+    # Convert image to base64 to embed in HTML
     buffered = BytesIO()
     img.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
 
-    # Full card: image + button + stats centered
-    card_html = f"""
-    <div style="text-align:center; margin-bottom:15px;">
+    # Display image
+    col.markdown(f"""
+    <div style="text-align:center; margin-bottom:10px;">
         <img src="data:image/png;base64,{img_str}" 
             style="width:250px; display:block; margin:0 auto; border-radius:5px;"/>
-        <div class="card-button">{ename}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Merged Netflix-style button (fully functional)
+    if col.button(ename, key=f"btn_{i}"):
+        selected_event = ename
+
+    # Stats below button
+    col.markdown(f"""
+    <div style='text-align:center;'>
         <p style='font-size:12px;margin:2px 0;'>Tickets Scanned: <b>{data['tickets_scanned']}</b></p>
         <p style='font-size:12px;margin:2px 0;'>Remaining Capacity: <b>{data['capacity']}</b></p>
     </div>
-    """
-    col.markdown(card_html, unsafe_allow_html=True)
-
-    # Functional Streamlit button (invisible) to handle selection
-    if col.button(f"Select {ename}", key=f"btn_{i}", help="Click the red button above"):
-        selected_event = ename
+    """, unsafe_allow_html=True)
 
 # --- Buy or Scan Option ---
 if selected_event:
@@ -129,3 +132,4 @@ if selected_event:
         qr_img.save(buf)
         st.image(buf)
         st.info("Scan this QR Code to go to the ticket verification page")
+
