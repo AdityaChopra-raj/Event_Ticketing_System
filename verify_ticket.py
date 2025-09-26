@@ -1,7 +1,7 @@
+import os
 import streamlit as st
 from blockchain import Blockchain
 from events_data import events
-from datetime import datetime
 
 # --- Initialize blockchain ---
 if "blockchain" not in st.session_state:
@@ -9,7 +9,6 @@ if "blockchain" not in st.session_state:
 blockchain = st.session_state.blockchain
 
 st.set_page_config(page_title="Verify Ticket", layout="centered", page_icon="✅")
-
 st.markdown("<h1 style='text-align:center;color:#004AAD;'>🎫 Ticket Verification</h1>", unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
 
